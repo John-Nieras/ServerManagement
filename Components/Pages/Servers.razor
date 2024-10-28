@@ -1,0 +1,73 @@
+﻿@page "/servers" 
+
+@inject NavigationManager NavigationManager
+
+<h3>Servers</h3> @* // Displays the heading for the page *@
+
+<br /> @* // Adds a line break for spacing *@
+<br /> @* // Adds another line break for additional spacing *@
+
+<div class="contain-fluid text-center">
+    <div class="row w-50s">
+        @foreach (var city in cities) // Iterates over each city in the cities list
+        {
+            <div class="col">
+                <div class="card">
+                    <img src="@($"/images/{city}.jpg")" class="card-img-top" alt="...">
+                    <div class="card-body">
+                        <button type="button" class="btn btn-primary">@city</button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+
+<br />
+<br />
+
+<ul>
+    @* // Starts an unordered list to display server information *@
+    @foreach (var server in servers) // Iterates over each server in the servers list
+    {
+        <li>
+            @* // Creates a list item for each server *@
+            @server.Name in @server.City is @* // Displays the server's name and city *@
+            <span style="color:@((server.IsOnline ? "green" : "red"))">
+               @*  // Changes text color based on server's online status *@
+                @(server.IsOnline ? "online" : "offline") @* // Displays "online" if server is online, otherwise "offline" *@
+            </span>
+            &nbsp;
+            <a href="/servers/@server.ServerId" class="btn btn-link">Edit</a>
+            &nbsp;
+
+            <EditForm 
+                Model="server"
+                FormName="@($"form-server-{server.ServerId}")"
+                OnValidSubmit="@(() => {DeleteServer(server.ServerId);})">
+                <button type="submit" class="btn btn-primary">Delete</button>
+            </EditForm>
+            
+        </li>
+        // Closes the list item
+    }
+</ul>
+
+<p>
+    <a href="/servers/add" class="btn btn-primary">Add Server</a>
+</p>
+
+@code {
+    // Begins the code block for the component
+    private List<Server> servers = ServersRepository.GetServersByCity("Tanauan"); // Retrieves a list of servers from a specific city (Tanauan)
+    private List<string> cities = CitiesRepository.GetCities(); // Retrieves a list of cities from the repository
+    private void DeleteServer(int serverId)
+    {
+        if(serverId > 0)
+        {
+            ServersRepository.DeleteServer(serverId);
+            NavigationManager.NavigateTo("/servers");
+        }
+    }
+}
